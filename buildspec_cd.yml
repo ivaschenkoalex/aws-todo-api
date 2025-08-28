@@ -2,29 +2,19 @@ version: 0.2
 phases:
   install:
     commands:
-      - set -euo pipefail
       - python -V
       - pip install -r requirements.txt -t package || true
   build:
     commands:
       - mkdir -p package
       - cp lambda_function.py package/
-      - cd package && zip -r ../function.zip .
+      - cd package
+      - zip -r ../function.zip .
       - cd ..
   post_build:
     commands:
-      - echo "=== DEBUG: who am I ==="
-      - aws sts get-caller-identity
-      - echo "=== DEBUG: region & CLI ==="
       - aws --version
-      - aws configure list
-      - echo "=== DEBUG: ls ==="
-      - ls -l function.zip
-      - echo "=== DEBUG: get-function ${LAMBDA_FUNCTION_NAME} ==="
-      - aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" || true
-      - echo "=== UPDATE FUNCTION CODE ==="
       - aws lambda update-function-code --function-name "$LAMBDA_FUNCTION_NAME" --zip-file fileb://function.zip
 artifacts:
   files:
     - function.zip
-
