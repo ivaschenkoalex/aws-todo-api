@@ -1,0 +1,17 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - python -V
+      - pip install -r requirements.txt -t package || true
+  build:
+    commands:
+      - mkdir -p package
+      - cp lambda_function.py package/
+      - cd package && zip -r ../function.zip .
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://function.zip
+artifacts:
+  files:
+    - function.zip
