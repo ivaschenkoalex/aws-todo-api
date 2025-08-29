@@ -7,12 +7,17 @@ phases:
       - pip install -r requirements-dev.txt
   build:
     commands:
-      - ruff .                   # lint
-      - black --check . || true  # format check (warn but don't fail; remove '|| true' to enforce)
+      - echo "=== Ruff version & config ==="
+      - ruff --version
+      - ruff config
+      - echo "=== Ruff check (GitHub format) ==="
+      - ruff check . --output-format=github
+      - echo "=== Black check ==="
+      - black --check . || true
+      - echo "=== Py compile ==="
       - python -m py_compile lambda_function.py
+      - echo "=== Pytest ==="
       - pytest -q
-      - mkdir -p package && cp lambda_function.py package/ && cd package && zip -r ../function.zip . && cd ..
 artifacts:
   files:
     - function.zip
-
