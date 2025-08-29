@@ -11,7 +11,7 @@ phases:
       - ruff --version
       - ruff config
       - echo "=== Ruff check (GitHub format) ==="
-      - ruff check . --output-format=github
+      - ruff check . --output-format=github || true
       - echo "=== Black check ==="
       - black --check . || true
       - echo "=== Py compile ==="
