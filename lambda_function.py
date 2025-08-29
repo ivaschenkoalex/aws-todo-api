@@ -1,11 +1,16 @@
-import os, json, time, boto3
+import json
+import os
+import time
+
+import boto3
 from aws_lambda_powertools import Logger, Tracer
 
-# Configure structured JSON logging & tracing
-logger = Logger(service="todo-api")   # emits JSON logs with service=todo-api
-tracer = Tracer(service="todo-api")   # captures segments/subsegments for X-Ray
+# Structured JSON logging & tracing
+logger = Logger(service="todo-api")
+tracer = Tracer(service="todo-api")
 
 table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
+
 
 def resp(code, body):
     return {
@@ -14,14 +19,15 @@ def resp(code, body):
         "body": json.dumps(body),
     }
 
-@tracer.capture_lambda_handler   # X-Ray: wrap the handler
-@logger.inject_lambda_context(log_event=True)  # log context + (optionally) the event
-def handler(event, context):
-    # Support HTTP API or REST API event shapes
-    method = (event.get("requestContext", {}).get("http", {}) or {}).get("method") \
-             or event.get("httpMethod", "GET")
 
-    logger.append_keys(method=method)  # add to every log line from here
+@tracer.capture_lambda_handler  # X-Ray: wrap the handler
+@logger.inject_lambda_context(log_event=True)  # logs context and (optionally) the event
+def handler(event, context):
+    # Works with HTTP API (preferred) or REST API events
+    http_ctx = (event.get("requestContext") or {}).get("http") or {}
+    method = http_ctx.get("method") or event.get("httpMethod", "GET")
+
+    logger.append_keys(method=method)  # include method in all subsequent log lines
 
     if method == "POST":
         try:
@@ -33,7 +39,7 @@ def handler(event, context):
         item_id = str(int(time.time() * 1000))
         item = {"id": item_id, "payload": body}
 
-        # X-Ray subsegment around DynamoDB call
+        # Trace the DynamoDB write as a subsegment
         with tracer.provider.in_subsegment("dynamodb_put"):
             table.put_item(Item=item)
 
@@ -48,6 +54,7 @@ def handler(event, context):
             logger.warning("missing_id")
             return resp(400, {"error": "id required"})
 
+        # Trace the DynamoDB read as a subsegment
         with tracer.provider.in_subsegment("dynamodb_get"):
             r = table.get_item(Key={"id": item_id})
 
