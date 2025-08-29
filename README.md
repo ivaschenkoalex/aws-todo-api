@@ -7,27 +7,5 @@ A tiny **serverless TODO API** on AWS with **PR-gated CI** and automated **CD**.
 - **CD (on main)**: CodePipeline → CodeBuild (`todo-cd`) packages and updates the Lambda
 - **Observability**: CloudWatch Logs & Metrics (+ optional alarm → SNS)
 
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-  subgraph Dev["Developer Workflow"]
-    A[Feature branch → GitHub] --> B[Pull Request]
-    B -->|Webhook| C[CodeBuild CI (todo-ci)]
-    C -->|Status| B
-    B -->|Merge to main| D[CodePipeline]
-    D --> E[CodeBuild CD (todo-cd)]
-    E --> F[Lambda code update]
-  end
-
-  subgraph Runtime["Runtime"]
-    G[Client / curl / browser] --> H[API Gateway /todo]
-    H --> I[Lambda: todo-api-dev]
-    I <--> J[(DynamoDB: todo-dev)]
-    I --> K[CloudWatch Logs & Metrics]
-  end
-
 
 
