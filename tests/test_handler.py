@@ -2,16 +2,16 @@ import json
 import os
 
 import boto3
-from moto import mock_dynamodb
+from moto import mock_aws  # <-- change
 
 from lambda_function import handler
 
 
-@mock_dynamodb
+@mock_aws  # <-- change
 def test_post_then_get_roundtrip():
     os.environ["TABLE_NAME"] = "todo-dev"
 
-    dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+    dynamodb = boto3.resource("dynamodb", region_name="us-east-2")
     dynamodb.create_table(
         TableName="todo-dev",
         KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
