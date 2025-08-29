@@ -1,9 +1,12 @@
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py311"  # matches CodeBuild log showing Python 3.11
+
+[tool.ruff.lint]
 select = ["E", "F", "I"]  # pycodestyle, pyflakes, import rules
 
 [tool.black]
 line-length = 120
-target-version = ["py312"]
+target-version = ["py311"]
+
 
