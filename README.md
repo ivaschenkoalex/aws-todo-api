@@ -14,11 +14,11 @@ A tiny **serverless TODO API** on AWS with **PR-gated CI** and automated **CD**.
 ```mermaid
 flowchart LR
   subgraph Dev["Developer Workflow"]
-    A[Feature branch<br/>GitHub] --> B[Pull Request]
-    B -->|Webhook| C[CodeBuild CI<br/>(todo-ci)]
+    A[Feature branch → GitHub] --> B[Pull Request]
+    B -->|Webhook| C[CodeBuild CI (todo-ci)]
     C -->|Status| B
     B -->|Merge to main| D[CodePipeline]
-    D --> E[CodeBuild CD<br/>(todo-cd)]
+    D --> E[CodeBuild CD (todo-cd)]
     E --> F[Lambda code update]
   end
 
@@ -28,5 +28,6 @@ flowchart LR
     I <--> J[(DynamoDB: todo-dev)]
     I --> K[CloudWatch Logs & Metrics]
   end
+
 
 
