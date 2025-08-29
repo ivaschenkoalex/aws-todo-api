@@ -4,13 +4,15 @@ phases:
     commands:
       - python -V
       - pip install -r requirements.txt || true
+      - pip install -r requirements-dev.txt
   build:
     commands:
-      # quick validation check; extend with pytest later
+      - ruff .                   # lint
+      - black --check . || true  # format check (warn but don't fail; remove '|| true' to enforce)
       - python -m py_compile lambda_function.py
-      - mkdir -p package
-      - cp lambda_function.py package/
-      - cd package && zip -r ../function.zip .
+      - pytest -q
+      - mkdir -p package && cp lambda_function.py package/ && cd package && zip -r ../function.zip . && cd ..
 artifacts:
   files:
     - function.zip
+
